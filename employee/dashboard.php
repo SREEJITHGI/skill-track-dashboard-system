@@ -27,7 +27,20 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $employee_id);
 $stmt->execute();
 $result = $stmt->get_result();
-$cert_count = $result->fetch_assoc()['cert_count'];
+// Check expiring certifications
+$query = "SELECT COUNT(*) as exp_count FROM employee_certifications WHERE employee_id = ? AND expiration_date IS NOT NULL AND expiration_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $employee_id);
+$stmt->execute();
+$my_expiring = $stmt->get_result()->fetch_assoc()['exp_count'];
+
+// Get target role name
+$query = "SELECT r.role_name FROM employees e LEFT JOIN job_roles r ON e.target_role_id = r.id WHERE e.id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $employee_id);
+$stmt->execute();
+$target_role_res = $stmt->get_result()->fetch_assoc();
+$my_target_role = !empty($target_role_res['role_name']) ? $target_role_res['role_name'] : 'Not Assigned';
 ?>
 
 <!DOCTYPE html>
@@ -51,33 +64,52 @@ $cert_count = $result->fetch_assoc()['cert_count'];
                     <a href="../logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
+
+            <?php if ($my_expiring > 0): ?>
+                <div class="alert-banner alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Notice:</strong> You have <?php echo $my_expiring; ?> certification(s) expiring within 30 days. 
+                        <a href="my_certifications.php" style="text-decoration: underline; font-weight: 700;">Check My Credentials</a>
+                    </div>
+                </div>
+            <?php endif; ?>
             
-            <div class="stats-container">
+            <div class="stats-container" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Your Skills</span>
                         <i class="fas fa-brain stat-icon"></i>
                     </div>
                     <div class="stat-value"><?php echo $skill_count; ?></div>
-                    <div class="stat-description">Skills in your profile</div>
+                    <div class="stat-description"><a href="my_skills.php" style="color: inherit; text-decoration: underline;">View & Update</a></div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <span class="stat-title">Your Certifications</span>
+                        <span class="stat-title">Target Role</span>
+                        <i class="fas fa-bullseye stat-icon" style="color: #2563eb;"></i>
+                    </div>
+                    <div class="stat-value" style="font-size: 1.15rem; color: #2563eb;"><?php echo htmlspecialchars($my_target_role); ?></div>
+                    <div class="stat-description"><a href="skill_gap.php" style="color: inherit; text-decoration: underline;">View Gap Analysis</a></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Certifications</span>
                         <i class="fas fa-certificate stat-icon"></i>
                     </div>
                     <div class="stat-value"><?php echo $cert_count; ?></div>
-                    <div class="stat-description">Certifications achieved</div>
+                    <div class="stat-description"><a href="my_certifications.php" style="color: inherit; text-decoration: underline;">Portfolio</a></div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <span class="stat-title">Employee ID</span>
-                        <i class="fas fa-id-card stat-icon"></i>
+                        <span class="stat-title">Upskilling Courses</span>
+                        <i class="fas fa-graduation-cap stat-icon" style="color: #10b981;"></i>
                     </div>
-                    <div class="stat-value"><?php echo htmlspecialchars($_SESSION['employee_id']); ?></div>
-                    <div class="stat-description">Your unique identifier</div>
+                    <div class="stat-value"><a href="training.php" style="color: var(--success-color);">Explore</a></div>
+                    <div class="stat-description">Close your skill gaps</div>
                 </div>
             </div>
             

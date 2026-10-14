@@ -1,4 +1,3 @@
-
 <div class="sidebar">
     <div class="sidebar-header">
         <h2><i class="fas fa-chart-line"></i> Skill Track</h2>
@@ -21,13 +20,18 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="certifications.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'certifications.php' ? 'active' : ''; ?>">
-                <i class="fas fa-certificate"></i> Certifications
+            <a href="roles.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'roles.php' ? 'active' : ''; ?>">
+                <i class="fas fa-bullseye"></i> Role Benchmarks
             </a>
         </li>
         <li class="nav-item">
-            <a href="reports.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'reports.php' ? 'active' : ''; ?>">
-                <i class="fas fa-chart-bar"></i> Reports
+            <a href="skill_gap.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'skill_gap.php' ? 'active' : ''; ?>">
+                <i class="fas fa-chart-pie"></i> Skill Gap Analysis
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="certifications.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'certifications.php' ? 'active' : ''; ?>">
+                <i class="fas fa-certificate"></i> Certifications
             </a>
         </li>
         <li class="nav-item">

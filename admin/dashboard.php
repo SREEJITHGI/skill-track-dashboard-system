@@ -13,10 +13,15 @@ $query = "SELECT COUNT(*) as total_skills FROM skills";
 $result = $conn->query($query);
 $total_skills = $result->fetch_assoc()['total_skills'];
 
-// Get total certifications
-$query = "SELECT COUNT(*) as total_certifications FROM certifications";
+// Get total roles
+$query = "SELECT COUNT(*) as total_roles FROM job_roles";
 $result = $conn->query($query);
-$total_certifications = $result->fetch_assoc()['total_certifications'];
+$total_roles = $result ? $result->fetch_assoc()['total_roles'] : 0;
+
+// Get expiring certifications count (<= 30 days)
+$query = "SELECT COUNT(*) as expiring_count FROM employee_certifications WHERE expiration_date IS NOT NULL AND expiration_date <= DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)";
+$result = $conn->query($query);
+$expiring_certs = $result ? $result->fetch_assoc()['expiring_count'] : 0;
 ?>
 
 <!DOCTYPE html>
@@ -40,15 +45,25 @@ $total_certifications = $result->fetch_assoc()['total_certifications'];
                     <a href="../logout.php" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
+
+            <?php if ($expiring_certs > 0): ?>
+                <div class="alert-banner alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Action Needed:</strong> <?php echo $expiring_certs; ?> employee certification(s) require renewal within 30 days. 
+                        <a href="certifications.php" style="text-decoration: underline; font-weight: 700;">View Expiring Credentials</a>
+                    </div>
+                </div>
+            <?php endif; ?>
             
-            <div class="stats-container">
+            <div class="stats-container" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                 <div class="stat-card">
                     <div class="stat-header">
                         <span class="stat-title">Total Employees</span>
                         <i class="fas fa-users stat-icon"></i>
                     </div>
                     <div class="stat-value"><?php echo $total_employees; ?></div>
-                    <div class="stat-description">Registered in the system</div>
+                    <div class="stat-description">Registered staff</div>
                 </div>
                 
                 <div class="stat-card">
@@ -57,16 +72,34 @@ $total_certifications = $result->fetch_assoc()['total_certifications'];
                         <i class="fas fa-brain stat-icon"></i>
                     </div>
                     <div class="stat-value"><?php echo $total_skills; ?></div>
-                    <div class="stat-description">Being tracked</div>
+                    <div class="stat-description">Catalog inventory</div>
                 </div>
                 
                 <div class="stat-card">
                     <div class="stat-header">
-                        <span class="stat-title">Total Certifications</span>
-                        <i class="fas fa-certificate stat-icon"></i>
+                        <span class="stat-title">Role Benchmarks</span>
+                        <i class="fas fa-bullseye stat-icon" style="color: #2563eb;"></i>
                     </div>
-                    <div class="stat-value"><?php echo $total_certifications; ?></div>
-                    <div class="stat-description">Registered in the system</div>
+                    <div class="stat-value"><?php echo $total_roles; ?></div>
+                    <div class="stat-description"><a href="roles.php" style="color: inherit; text-decoration: underline;">Configure</a></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Skill Gap Analysis</span>
+                        <i class="fas fa-chart-pie stat-icon" style="color: #10b981;"></i>
+                    </div>
+                    <div class="stat-value" style="font-size: 1.25rem;"><a href="skill_gap.php" style="color: var(--primary-color);">Open Radar</a></div>
+                    <div class="stat-description">Staff vs. targets</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Expiring Certs</span>
+                        <i class="fas fa-clock stat-icon" style="color: <?php echo $expiring_certs > 0 ? '#f59e0b' : '#64748b'; ?>;"></i>
+                    </div>
+                    <div class="stat-value" style="color: <?php echo $expiring_certs > 0 ? '#f59e0b' : 'inherit'; ?>;"><?php echo $expiring_certs; ?></div>
+                    <div class="stat-description"><a href="certifications.php" style="color: inherit; text-decoration: underline;">Audit renewals</a></div>
                 </div>
             </div>
             
